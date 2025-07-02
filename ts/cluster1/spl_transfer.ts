@@ -1,5 +1,11 @@
-import { Commitment, Connection, Keypair, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js"
-import wallet from "../turbin3-wallet.json"
+import {
+  Commitment,
+  Connection,
+  Keypair,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+} from "@solana/web3.js";
+import wallet from "../turbin3-wallet.json";
 import { getOrCreateAssociatedTokenAccount, transfer } from "@solana/spl-token";
 
 // We're going to import our keypair from the wallet file
@@ -10,19 +16,36 @@ const commitment: Commitment = "confirmed";
 const connection = new Connection("https://api.devnet.solana.com", commitment);
 
 // Mint address
-const mint = new PublicKey("<mint address>");
+const mint = new PublicKey("7kDzn1uCFeMEDVAU8aPd3h3ENHhEQsAEsroK6g4cEWyr");
 
 // Recipient address
-const to = new PublicKey("<receiver address>");
+const to = new PublicKey("3Hce9T6umcyH3pGg916o73qvMjjWv8YMExTyrSLqvtW2");
 
 (async () => {
-    try {
-        // Get the token account of the fromWallet address, and if it does not exist, create it
+  try {
+    const ata_from = await getOrCreateAssociatedTokenAccount(
+      connection,
+      keypair,
+      mint,
+      keypair.publicKey
+    );
+    const ata_to = await getOrCreateAssociatedTokenAccount(
+      connection,
+      keypair,
+      mint,
+      to
+    );
+    const tx = await transfer(
+      connection,
+      keypair,
+      ata_from.address,
+      ata_to.address,
+      keypair.publicKey,
+      1 * 1_000_000
+    );
 
-        // Get the token account of the toWallet address, and if it does not exist, create it
-
-        // Transfer the new token to the "toTokenAccount" we just created
-    } catch(e) {
-        console.error(`Oops, something went wrong: ${e}`)
-    }
+    console.log(`Transaction succesfull : ${tx}`);
+  } catch (e) {
+    console.error(`Oops, something went wrong: ${e}`);
+  }
 })();
